@@ -1,21 +1,23 @@
 #!/usr/bin/env python
 
-""" 
- * DEPTH ANYTHING ROS
- *
- * Copyright (c) 2023 Alberto José Tudela Roldán <ajtudela@gmail.com>
- * Copyright (c) 2023 Óscar Pons Fernández <oscarpf22@gmail.com>
- * 
- * This file is part of depth_anything_v2_ros2 project.
- * 
- * All rights reserved.
- *
-"""
+# Copyright (c) 2024 Óscar Pons Fernández <oscarpf22@gmail.com>
+# Copyright (c) 2024 Alberto J. Tudela Roldán
+# Copyright (c) 2024 Grupo Avispa, DTE, Universidad de Málaga
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http:#www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 
 # Python
-import sys
-import os
-import math
 import time
 import numpy as np
 import torch
@@ -25,13 +27,12 @@ from cv_bridge import CvBridge, CvBridgeError
 # ROS 2
 import rclpy
 from rclpy.node import Node
-from rclpy.parameter import Parameter
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSHistoryPolicy, QoSReliabilityPolicy
-from std_msgs.msg import Header
 from sensor_msgs.msg import Image
 
 # DepthAnything V2
 from depth_anything_v2.dpt import DepthAnythingV2
+
 
 class DepthAnythingROS(Node):
     """DepthAnythingROS node
@@ -81,36 +82,43 @@ class DepthAnythingROS(Node):
         self.get_params()
         # Check device selected and if gpu is available
         if self.device != 'cpu':
-            if not torch.cuda.is_available() : 
+            if not torch.cuda.is_available():
                 self.get_logger().info(f'Device could not be set to: [{self.device}] ...')
                 self.device = "cpu"
         self.get_logger().info(f'Setting device to: [{self.device}]')
-        
+
         # Model initialization
         if self.encoder == 'vits':
-            self.model = DepthAnythingV2(encoder=self.encoder, features=64, out_channels=[48, 96, 192, 384])
+            self.model = DepthAnythingV2(encoder=self.encoder, features=64,
+                                         out_channels=[48, 96, 192, 384])
         elif self.encoder == 'vitb':
-            self.model = DepthAnythingV2(encoder=self.encoder, features=128, out_channels=[96, 192, 384, 768])
+            self.model = DepthAnythingV2(encoder=self.encoder, features=128,
+                                         out_channels=[96, 192, 384, 768])
         elif self.encoder == 'vitl':
-            self.model = DepthAnythingV2(encoder=self.encoder, features=256, out_channels=[256, 512, 1024, 1024])
+            self.model = DepthAnythingV2(encoder=self.encoder, features=256,
+                                         out_channels=[256, 512, 1024, 1024])
         else:
-            self.get_logger().error(f'\n\nWrong type of encoder: [{self.encoder}]. Must be vits, vitb or vitl\n\n')
+            self.get_logger().error(
+                f'nWrong type of encoder: [{self.encoder}]. Must be vits, vitb or vitl')
         self.model.load_state_dict(torch.load(self.model_file, map_location=self.device))
         self.model.to(self.device).eval()
 
         # Create common publishers
         sensor_qos_profile = QoSProfile(
-            durability = QoSDurabilityPolicy.VOLATILE,
-            reliability = QoSReliabilityPolicy.BEST_EFFORT,
-            history = QoSHistoryPolicy.KEEP_LAST,
-            depth = 1)
-        self.depth_image_pub = self.create_publisher(Image, self.depth_image_topic, sensor_qos_profile)
-        self.inv_depth_image_pub = self.create_publisher(Image, self.inv_depth_image_topic, sensor_qos_profile)
+            durability=QoSDurabilityPolicy.VOLATILE,
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            history=QoSHistoryPolicy.KEEP_LAST,
+            depth=1)
+        self.depth_image_pub = self.create_publisher(
+            Image, self.depth_image_topic, sensor_qos_profile)
+        self.inv_depth_image_pub = self.create_publisher(
+            Image, self.inv_depth_image_topic, sensor_qos_profile)
 
         # Create subscribers
-        self.image_sub = self.create_subscription(Image, self.image_topic, self.image_callback, sensor_qos_profile)
+        self.image_sub = self.create_subscription(
+            Image, self.image_topic, self.image_callback, sensor_qos_profile)
 
-    def get_params(self):
+    def get_params(self) -> None:
         """Get the parameters from the parameter server.
         """
         # Declare and acquire parameters
@@ -119,7 +127,7 @@ class DepthAnythingROS(Node):
             'model_file').get_parameter_value().string_value
         self.get_logger().info(
             f'The parameter model_file is set to: [{self.model_file}]')
-        
+
         self.declare_parameter('encoder', 'vits')
         self.encoder = self.get_parameter(
             'encoder').get_parameter_value().string_value
@@ -143,14 +151,14 @@ class DepthAnythingROS(Node):
             'depth_image_topic').get_parameter_value().string_value
         self.get_logger().info(
             f'The parameter depth_image_topic is set to: [{self.depth_image_topic}]')
-        
+
         self.declare_parameter('inv_depth_image_topic', 'inv_depth')
         self.inv_depth_image_topic = self.get_parameter(
             'inv_depth_image_topic').get_parameter_value().string_value
         self.get_logger().info(
             f'The parameter inv_depth_image_topic is set to: [{self.inv_depth_image_topic}]')
 
-    def image_callback(self, image_msg: Image):
+    def image_callback(self, image_msg: Image) -> None:
         """Publishes the image with the detections.
 
         Args:
@@ -159,10 +167,11 @@ class DepthAnythingROS(Node):
 
         # Only detect object if there's any subscriber
         if self.depth_image_pub.get_subscription_count() == 0 and \
-            self.inv_depth_image_pub.get_subscription_count() == 0 :
+                self.inv_depth_image_pub.get_subscription_count() == 0:
             return
 
-        self.get_logger().info(f'Subscribed to depth image topic: [{self.depth_image_topic}]', once=True)
+        self.get_logger().info(
+            f'Subscribed to depth image topic: [{self.depth_image_topic}]', once=True)
         start_time = time.time()
 
         # Convert ROS Image to OpenCV Image
@@ -176,15 +185,15 @@ class DepthAnythingROS(Node):
 
         # Perform inference
         depth = self.model.infer_image(self.current_image)
-        
+
         # Normalize pixel values between 0-255
         depth = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
         depth = depth.astype(np.uint8)
-        
+
         end_time = time.time()
         execution_time = end_time - start_time
         self.get_logger().info(f"Depth estimation took: {execution_time*1000:.1f} ms")
-        
+
         # Generate inverted image
         depth_inv = cv2.bitwise_not(depth)
 
@@ -196,6 +205,7 @@ class DepthAnythingROS(Node):
             self.inv_depth_image_pub.publish(inv_ros_image)
         except CvBridgeError as e:
             print(e)
+
 
 def main(args=None):
     rclpy.init(args=args)

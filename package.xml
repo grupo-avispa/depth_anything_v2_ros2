@@ -2,10 +2,15 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>depth_anything_v2_ros2</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="0610735543@uma.es">oscar</maintainer>
+  <version>1.0.0</version>
+  <description>ROS2 Wrapper for DepthAnything V2 model</description>
+  <author email="oscarpf22@gmail.com">Óscar Pons Fernández</author>
+  <maintainer email="oscarpf22@gmail.com">Óscar Pons Fernández</maintainer>
   <license>Apache-2.0</license>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
