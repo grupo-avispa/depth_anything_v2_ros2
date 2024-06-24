@@ -1,0 +1,5 @@
+# Ignorar archivos .pth dentro de la carpeta models
+/models/*.pth
+
+# Ignorar la carpeta venv completa
+/venv/
