@@ -1,5 +1,10 @@
-# Ignorar archivos .pth dentro de la carpeta models
+# Ignor *.pth files
 /models/*.pth
 
-# Ignorar la carpeta venv completa
+# Ignore the virtual environment
 /venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
