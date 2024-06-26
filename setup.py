@@ -3,6 +3,7 @@ from glob import glob
 from setuptools import find_packages, setup
 
 package_name = 'depth_anything_v2_ros2'
+submodule_name = 'depth_anything_v2'
 
 setup(
     name=package_name,
@@ -10,6 +11,12 @@ setup(
     packages=find_packages(),
     data_files=[
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
+        (os.path.join('lib', package_name, submodule_name, submodule_name),
+         glob(os.path.join(submodule_name, submodule_name, '*.py'))),
+        (os.path.join('lib', package_name, submodule_name, submodule_name, 'dinov2_layers'),
+         glob(os.path.join(submodule_name, submodule_name, 'dinov2_layers', '*.py'))),
+        (os.path.join('lib', package_name, submodule_name, submodule_name, 'util'),
+         glob(os.path.join(submodule_name, submodule_name, 'util', '*.py'))),
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*.launch.py'))),
         (os.path.join('share', package_name, 'models'), glob(os.path.join('models', '*.pth'))),

@@ -31,7 +31,7 @@ from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSHistoryPolicy, QoSReli
 from sensor_msgs.msg import Image
 
 # DepthAnything V2
-from depth_anything_v2.dpt import DepthAnythingV2
+from depth_anything_v2.depth_anything_v2.dpt import DepthAnythingV2
 
 
 class DepthAnythingROS(Node):
