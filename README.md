@@ -28,9 +28,11 @@ To build from source, clone the latest version from the main repository into you
 cd colcon_workspace/src
 git clone https://github.com/grupo-avispa/depth_anything_v2_ros2.git -b main
 cd depth_anything_v2_ros2
+git submodule init
+git submodule update
 pip3 install -r requirements.txt
 ```
-
+Before building make sure to download your depth_anything_v2 models and store them in the /models folder. You can download them in here.
 Then, install the ROS2 dependencies using rosdep and build the package using:
 ```bash
 cd colcon_workspace
