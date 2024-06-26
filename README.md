@@ -32,7 +32,8 @@ git submodule init
 git submodule update
 pip3 install -r requirements.txt
 ```
-Before building make sure to download your depth_anything_v2 models and store them in the /models folder. You can download them in here.
+Before building, make sure to download the depth_anything_v2 model weights and place them in the `models` directory. You can download them [here](https://huggingface.co/depth-anything).
+
 Then, install the ROS2 dependencies using rosdep and build the package using:
 ```bash
 cd colcon_workspace
@@ -41,8 +42,6 @@ colcon build --symlink-install
 ```
 
 ## Usage
-
-Download the model weights from the depth_anything_v2 [pre-trained-models](https://github.com/DepthAnything/Depth-Anything-V2/tree/main/metric_depth#pre-trained-models) and place them in the `models` directory.
 
 With some RGB image source running, run the depth_anything_v2_ros2 node with:
 ```bash
