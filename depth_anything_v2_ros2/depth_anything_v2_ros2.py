@@ -51,8 +51,6 @@ class DepthAnythingROS(Node):
             Path to the model.
         encoder : str
             Encoder to use for the model (vits, vitb or vitl).
-        inv_depth_image_topic : str
-            Topic where the inverted depth image will be published.
 
     Subscribers
     ----------
@@ -111,8 +109,6 @@ class DepthAnythingROS(Node):
             depth=1)
         self.depth_image_pub = self.create_publisher(
             Image, self.depth_image_topic, sensor_qos_profile)
-        self.inv_depth_image_pub = self.create_publisher(
-            Image, self.inv_depth_image_topic, sensor_qos_profile)
 
         # Create subscribers
         self.image_sub = self.create_subscription(
@@ -152,12 +148,6 @@ class DepthAnythingROS(Node):
         self.get_logger().info(
             f'The parameter encoder is set to: [{self.encoder}]')
 
-        self.declare_parameter('inv_depth_image_topic', 'inv_depth')
-        self.inv_depth_image_topic = self.get_parameter(
-            'inv_depth_image_topic').get_parameter_value().string_value
-        self.get_logger().info(
-            f'The parameter inv_depth_image_topic is set to: [{self.inv_depth_image_topic}]')
-
     def image_callback(self, image_msg: Image) -> None:
         """Publishes the image with the detections.
 
@@ -192,17 +182,12 @@ class DepthAnythingROS(Node):
 
         end_time = time.time()
         execution_time = end_time - start_time
-        self.get_logger().info(f"Depth estimation took: {execution_time*1000:.1f} ms")
-
-        # Generate inverted image
-        depth_inv = cv2.bitwise_not(depth)
+        self.get_logger().debug(f"Depth estimation took: {execution_time*1000:.1f} ms")
 
         # Convert OpenCV Images to ROS Image and publish it
         try:
             ros_image = self.bridge.cv2_to_imgmsg(depth, "mono8", image_msg.header)
-            inv_ros_image = self.bridge.cv2_to_imgmsg(depth_inv, "mono8", image_msg.header)
             self.depth_image_pub.publish(ros_image)
-            self.inv_depth_image_pub.publish(inv_ros_image)
         except CvBridgeError as e:
             print(e)
 

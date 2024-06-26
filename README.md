@@ -87,10 +87,6 @@ This node subscribes to a camera topic and publishes the depth map of the scene.
 
 	Encoder to use for the inference (`vits`, `vitb` or `vitl`).
 
-* **`inv_depth_image_topic`** (string, default: "inv_depth")
-
-	Topic where the inverse depth image will be published.
-
 
 [Ubuntu]: https://ubuntu.com/
 [ROS2]: https://docs.ros.org/en/humble/
