@@ -37,7 +37,7 @@ def generate_launch_description():
     )
 
     declare_log_level_arg = DeclareLaunchArgument(
-        name = 'log-level',
+        name = 'log_level',
         default_value = 'info',
         description = 'Logging level (info, debug, ...)'
     )
@@ -59,13 +59,13 @@ def generate_launch_description():
         package = 'depth_anything_v2_ros2',
         namespace = '',
         executable = 'depth_anything_v2_ros2',
-        name = 'depth_anything_v2_ros2',
+        name = 'depth_anything',
         parameters = [configured_params],
         emulate_tty = True,
         output = 'screen', 
         arguments = [
             '--ros-args', 
-            '--log-level', ['depth_anything_v2_ros2:=', LaunchConfiguration('log-level')]]
+            '--log-level', ['depth_anything:=', LaunchConfiguration('log_level')]]
     )
 
     return LaunchDescription([

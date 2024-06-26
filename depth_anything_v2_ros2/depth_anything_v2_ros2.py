@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Copyright (c) 2024 Óscar Pons Fernández <oscarpf22@gmail.com>
-# Copyright (c) 2024 Alberto J. Tudela Roldán
+# Copyright (c) 2024 Alberto J. Tudela Roldán <ajtudela@gmail.com>
 # Copyright (c) 2024 Grupo Avispa, DTE, Universidad de Málaga
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,18 +41,18 @@ class DepthAnythingROS(Node):
 
     Parameters
     ----------
-        model_file : str
-            Path to the model.
-        device : str
-            Device to use for the inference (cpu or cuda).
         image_topic : str
             Topic where the image will be subscribed.
         depth_image_topic : str
             Topic where the raw depth image will be published.
-        metric_enable : bool
-            Enables metric depth image publisher.
-        max_distance : float
-            Max distance in real world for metric depth estimation.
+        device : str
+            Device to use for the inference (cpu or cuda).
+        model_file : str
+            Path to the model.
+        encoder : str
+            Encoder to use for the model (vits, vitb or vitl).
+        inv_depth_image_topic : str
+            Topic where the inverted depth image will be published.
 
     Subscribers
     ----------
@@ -75,7 +75,7 @@ class DepthAnythingROS(Node):
     """
 
     def __init__(self):
-        super().__init__('depth_anything_v2_ros2')
+        super().__init__('depth_anything')
         self.bridge = CvBridge()
 
         # Get parameters
@@ -122,24 +122,6 @@ class DepthAnythingROS(Node):
         """Get the parameters from the parameter server.
         """
         # Declare and acquire parameters
-        self.declare_parameter('model_file', 'depth_anything_v2_vits.pth')
-        self.model_file = self.get_parameter(
-            'model_file').get_parameter_value().string_value
-        self.get_logger().info(
-            f'The parameter model_file is set to: [{self.model_file}]')
-
-        self.declare_parameter('encoder', 'vits')
-        self.encoder = self.get_parameter(
-            'encoder').get_parameter_value().string_value
-        self.get_logger().info(
-            f'The parameter encoder is set to: [{self.encoder}]')
-
-        self.declare_parameter('device', 'cuda:0')
-        self.device = self.get_parameter(
-            'device').get_parameter_value().string_value
-        self.get_logger().info(
-            f'The parameter device is set to: [{self.device}]')
-
         self.declare_parameter('image_topic', 'camera/color/image_raw')
         self.image_topic = self.get_parameter(
             'image_topic').get_parameter_value().string_value
@@ -151,6 +133,24 @@ class DepthAnythingROS(Node):
             'depth_image_topic').get_parameter_value().string_value
         self.get_logger().info(
             f'The parameter depth_image_topic is set to: [{self.depth_image_topic}]')
+
+        self.declare_parameter('device', 'cuda:0')
+        self.device = self.get_parameter(
+            'device').get_parameter_value().string_value
+        self.get_logger().info(
+            f'The parameter device is set to: [{self.device}]')
+
+        self.declare_parameter('model_file', 'depth_anything_v2_vits.pth')
+        self.model_file = self.get_parameter(
+            'model_file').get_parameter_value().string_value
+        self.get_logger().info(
+            f'The parameter model_file is set to: [{self.model_file}]')
+
+        self.declare_parameter('encoder', 'vits')
+        self.encoder = self.get_parameter(
+            'encoder').get_parameter_value().string_value
+        self.get_logger().info(
+            f'The parameter encoder is set to: [{self.encoder}]')
 
         self.declare_parameter('inv_depth_image_topic', 'inv_depth')
         self.inv_depth_image_topic = self.get_parameter(
