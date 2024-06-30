@@ -109,6 +109,8 @@ class DepthAnythingROS(Node):
             depth=1)
         self.depth_image_pub = self.create_publisher(
             Image, self.depth_image_topic, sensor_qos_profile)
+        self.inv_depth_image_pub = self.create_publisher(
+            Image, self.inv_depth_image_topic, sensor_qos_profile)
 
         # Create subscribers
         self.image_sub = self.create_subscription(
@@ -129,6 +131,12 @@ class DepthAnythingROS(Node):
             'depth_image_topic').get_parameter_value().string_value
         self.get_logger().info(
             f'The parameter depth_image_topic is set to: [{self.depth_image_topic}]')
+        
+        self.declare_parameter('inv_depth_image_topic', 'inverted_depth')
+        self.inv_depth_image_topic = self.get_parameter(
+            'inv_depth_image_topic').get_parameter_value().string_value
+        self.get_logger().info(
+            f'The parameter inv_depth_image_topic is set to: [{self.inv_depth_image_topic}]')
 
         self.declare_parameter('device', 'cuda:0')
         self.device = self.get_parameter(
