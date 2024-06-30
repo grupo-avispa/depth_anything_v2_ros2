@@ -156,8 +156,7 @@ class DepthAnythingROS(Node):
         """
 
         # Only detect object if there's any subscriber
-        if self.depth_image_pub.get_subscription_count() == 0 and \
-                self.inv_depth_image_pub.get_subscription_count() == 0:
+        if self.depth_image_pub.get_subscription_count() == 0:
             return
 
         self.get_logger().info(

@@ -7,4 +7,3 @@ depth_anything:
     # ROS topic configuration
     image_topic: /image_rect
     depth_image_topic : /depth
-    inv_depth_image_topic: /inverted_depth
