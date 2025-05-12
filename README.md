@@ -1,5 +1,5 @@
 # depth_anything_v2_ros2
-![ROS2](https://img.shields.io/badge/ros2-humble-blue?logo=ros&logoColor=white)
+![ROS2](https://img.shields.io/badge/ros2-jazzy-blue?logo=ros&logoColor=white)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build](https://github.com/grupo-avispa/depth_anything_v2_ros2/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/grupo-avispa/depth_anything_v2_ros2/actions/workflows/build.yml)
 
@@ -11,14 +11,14 @@ This package is a ROS2 wrapper for the [depth_anything_v2](https://github.com/De
  | ![RGB](doc/raw.png) | ![Depth](doc/depth.png) |
 
 
-The depth_anything_v2_ros2 package has been tested under [ROS2] Humble on [Ubuntu] 22.04. This is research code, expect that it changes often and any fitness for a particular purpose is disclaimed.
+The depth_anything_v2_ros2 package has been tested under [ROS2] jazzy on [Ubuntu] 22.04. This is research code, expect that it changes often and any fitness for a particular purpose is disclaimed.
 
 ## Installation
 ### Building from Source
 
 #### Dependencies
 
-- [Robot Operating System (ROS) 2](https://docs.ros.org/en/humble/) (middleware for robotics),
+- [Robot Operating System (ROS) 2](https://docs.ros.org/en/jazzy/) (middleware for robotics),
 - [depth_anything_v2](https://github.com/DepthAnything/Depth-Anything-V2) (library for depth estimation),
 - [torch](https://pytorch.org/) (deep learning framework)
 
@@ -27,11 +27,7 @@ The depth_anything_v2_ros2 package has been tested under [ROS2] Humble on [Ubunt
 To build from source, clone the latest version from the main repository into your colcon workspace and install the python dependencies by running the following commands:
 ```bash
 cd colcon_workspace/src
-git clone https://github.com/grupo-avispa/depth_anything_v2_ros2.git -b main
-cd depth_anything_v2_ros2
-git submodule init
-git submodule update
-cd ..
+git clone --recurse-submodules https://github.com/grupo-avispa/depth_anything_v2_ros2.git -b main
 pip3 install -r requirements.txt
 ```
 Before building, make sure to download the depth_anything_v2 model weights and place them in the `models` directory. You can download them [here](https://huggingface.co/depth-anything).
@@ -39,7 +35,7 @@ Before building, make sure to download the depth_anything_v2 model weights and p
 Then, install the ROS2 dependencies using rosdep and build the package using:
 ```bash
 cd colcon_workspace
-rosdep install -i --from-path src --rosdistro humble -y
+rosdep install -i --from-path src --rosdistro jazzy -y
 colcon build --symlink-install
 ```
 
@@ -92,5 +88,5 @@ This node subscribes to a camera topic and publishes the depth map of the scene.
 
 
 [Ubuntu]: https://ubuntu.com/
-[ROS2]: https://docs.ros.org/en/humble/
-[sensor_msgs/Image]: https://docs.ros2.org/humble/api/sensor_msgs/msg/Image.html
+[ROS2]: https://docs.ros.org/en/jazzy/
+[sensor_msgs/Image]: https://docs.ros2.org/jazzy/api/sensor_msgs/msg/Image.html
