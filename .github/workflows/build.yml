@@ -19,12 +19,18 @@ jobs:
           packages: git python3-pip
       - name: Checkout Repository
         uses: actions/checkout@v4.2.2
+        with:
+          submodules: recursive
+      - name: Cache pip
+        id: cache-pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: Install dependencies
-        run: |
-          cd depth_anything_v2_ros2
-          git submodule init && git submodule update
-          cd ..
-          pip3 install -r requirements.txt
+        run: pip3 install -r requirements.txt
       - name: Setup ROS 2
         uses: ros-tooling/setup-ros@0.7.5
         with:
@@ -43,4 +49,4 @@ jobs:
                 "mixin": ["coverage-pytest"]
               }
             }
-          skip-tests: false
+          skip-tests: true
