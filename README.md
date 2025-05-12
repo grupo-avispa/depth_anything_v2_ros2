@@ -31,6 +31,7 @@ git clone https://github.com/grupo-avispa/depth_anything_v2_ros2.git -b main
 cd depth_anything_v2_ros2
 git submodule init
 git submodule update
+cd ..
 pip3 install -r requirements.txt
 ```
 Before building, make sure to download the depth_anything_v2 model weights and place them in the `models` directory. You can download them [here](https://huggingface.co/depth-anything).

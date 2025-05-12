@@ -22,8 +22,8 @@ jobs:
       - name: Install dependencies
         run: |
           cd depth_anything_v2_ros2
-          git submodule init
-          git submodule update
+          git submodule init && git submodule update
+          cd ..
           pip3 install -r requirements.txt
       - name: Setup ROS 2
         uses: ros-tooling/setup-ros@0.7.5
