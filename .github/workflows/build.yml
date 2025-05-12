@@ -1,0 +1,46 @@
+# Simple set of rules for GitHub actions integration with a ROS project
+#
+
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  install-depth-anything:
+    name: Install Depth Anything
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Cache APT Packages
+        uses: awalsh128/cache-apt-pkgs-action@v1.4.3
+        with:
+          packages: git python3-pip
+      - name: Checkout Repository
+        uses: actions/checkout@v4.2.2
+      - name: Install dependencies
+        run: |
+          cd depth_anything_v2_ros2
+          git submodule init
+          git submodule update
+          pip3 install -r requirements.txt
+      - name: Setup ROS 2
+        uses: ros-tooling/setup-ros@0.7.5
+        with:
+          required-ros-distributions: jazzy
+      - name: Build packages
+        uses: ros-tooling/action-ros-ci@0.3.13
+        with:
+          package-name: depth_anything_v2_ros2
+          target-ros2-distro: jazzy
+          colcon-defaults: |
+            {
+              "build": {
+                "mixin": ["coverage-gcc", "coverage-pytest"]
+              },
+              "test": {
+                "mixin": ["coverage-pytest"]
+              }
+            }
+          skip-tests: false

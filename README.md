@@ -1,13 +1,14 @@
 # depth_anything_v2_ros2
 ![ROS2](https://img.shields.io/badge/ros2-humble-blue?logo=ros&logoColor=white)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Build](https://github.com/grupo-avispa/depth_anything_v2_ros2/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/grupo-avispa/depth_anything_v2_ros2/actions/workflows/build.yml)
 
 ## Overview
 This package is a ROS2 wrapper for the [depth_anything_v2](https://github.com/DepthAnything/Depth-Anything-V2) library. It provides a ROS2 node that subscribes to a camera topic and publishes the depth map of the scene.
 
- *RGB* | *Depth* |
-| :------------: | :-----------------------: |
-| ![RGB](doc/raw.png)  | ![Depth](doc/depth.png) |
+ |        *RGB*        |         *Depth*         |
+ | :-----------------: | :---------------------: |
+ | ![RGB](doc/raw.png) | ![Depth](doc/depth.png) |
 
 
 The depth_anything_v2_ros2 package has been tested under [ROS2] Humble on [Ubuntu] 22.04. This is research code, expect that it changes often and any fitness for a particular purpose is disclaimed.
