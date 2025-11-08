@@ -104,7 +104,8 @@ class DepthAnythingROS(Node):
         # Create common publishers
         sensor_qos_profile = QoSProfile(
             durability=QoSDurabilityPolicy.VOLATILE,
-            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+         #   reliability=QoSReliabilityPolicy.BEST_EFFORT,
+         reliability=QoSReliabilityPolicy.RELIABLE, #edit to match the system
             history=QoSHistoryPolicy.KEEP_LAST,
             depth=1)
         self.depth_image_pub = self.create_publisher(
@@ -176,8 +177,11 @@ class DepthAnythingROS(Node):
         depth = self.model.infer_image(self.current_image)
 
         # Normalize pixel values between 0-255
-        depth = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
-        depth = depth.astype(np.uint8)
+       # depth = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
+	
+       # depth = depth.astype(np.uint8)
+        depth = depth.max()-depth # invert the output 
+        
 
         end_time = time.time()
         execution_time = end_time - start_time
@@ -185,7 +189,10 @@ class DepthAnythingROS(Node):
 
         # Convert OpenCV Images to ROS Image and publish it
         try:
-            ros_image = self.bridge.cv2_to_imgmsg(depth, "mono8", image_msg.header)
+            #ros_image = self.bridge.cv2_to_imgmsg(depth, "mono8", image_msg.header)
+            
+            ros_image = self.bridge.cv2_to_imgmsg(depth.astype(np.float32), encoding="32FC1")
+            ros_image.header = image_msg.header
             self.depth_image_pub.publish(ros_image)
         except CvBridgeError as e:
             print(e)
