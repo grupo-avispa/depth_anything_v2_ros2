@@ -32,11 +32,11 @@ jobs:
       - name: Install dependencies
         run: pip3 install -r requirements.txt
       - name: Setup ROS 2
-        uses: ros-tooling/setup-ros@0.7.5
+        uses: ros-tooling/setup-ros@0.7.15
         with:
           required-ros-distributions: jazzy
       - name: Build packages
-        uses: ros-tooling/action-ros-ci@0.3.13
+        uses: ros-tooling/action-ros-ci@0.4.5
         with:
           package-name: depth_anything_v2_ros2
           target-ros2-distro: jazzy
