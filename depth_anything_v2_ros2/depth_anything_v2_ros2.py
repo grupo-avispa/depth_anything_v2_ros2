@@ -31,7 +31,7 @@ from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSHistoryPolicy, QoSReli
 from sensor_msgs.msg import Image
 
 # DepthAnything V2
-from depth_anything_v2.depth_anything_v2.dpt import DepthAnythingV2
+from depth_anything_v2.metric_depth.depth_anything_v2.dpt import DepthAnythingV2
 
 
 class DepthAnythingROS(Node):
@@ -88,13 +88,16 @@ class DepthAnythingROS(Node):
         # Model initialization
         if self.encoder == 'vits':
             self.model = DepthAnythingV2(encoder=self.encoder, features=64,
-                                         out_channels=[48, 96, 192, 384])
+                                         out_channels=[48, 96, 192, 384],
+                                         max_depth=self.max_depth)
         elif self.encoder == 'vitb':
             self.model = DepthAnythingV2(encoder=self.encoder, features=128,
-                                         out_channels=[96, 192, 384, 768])
+                                         out_channels=[96, 192, 384, 768],
+                                         max_depth=self.max_depth)
         elif self.encoder == 'vitl':
             self.model = DepthAnythingV2(encoder=self.encoder, features=256,
-                                         out_channels=[256, 512, 1024, 1024])
+                                         out_channels=[256, 512, 1024, 1024],
+                                         max_depth=self.max_depth)
         else:
             self.get_logger().error(
                 f'nWrong type of encoder: [{self.encoder}]. Must be vits, vitb or vitl')
@@ -147,6 +150,12 @@ class DepthAnythingROS(Node):
             'encoder').get_parameter_value().string_value
         self.get_logger().info(
             f'The parameter encoder is set to: [{self.encoder}]')
+        
+        self.declare_parameter('max_depth', 10.0)
+        self.max_depth = self.get_parameter(
+            'max_depth').get_parameter_value().double_value
+        self.get_logger().info(
+            f'The parameter max_depth is set to: [{self.max_depth}]')
 
     def image_callback(self, image_msg: Image) -> None:
         """Publishes the image with the detections.
@@ -175,9 +184,9 @@ class DepthAnythingROS(Node):
         # Perform inference
         depth = self.model.infer_image(self.current_image)
 
-        # Normalize pixel values between 0-255
-        depth = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
-        depth = depth.astype(np.uint8)
+        # Invert depth valies and clip to max depth
+        depth = np.clip(depth, 0, self.max_depth)
+        depth = depth.astype(np.float32)
 
         end_time = time.time()
         execution_time = end_time - start_time
@@ -185,7 +194,7 @@ class DepthAnythingROS(Node):
 
         # Convert OpenCV Images to ROS Image and publish it
         try:
-            ros_image = self.bridge.cv2_to_imgmsg(depth, "mono8", image_msg.header)
+            ros_image = self.bridge.cv2_to_imgmsg(depth, "32FC1", image_msg.header)
             self.depth_image_pub.publish(ros_image)
         except CvBridgeError as e:
             print(e)

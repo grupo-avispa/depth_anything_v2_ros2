@@ -4,6 +4,7 @@ depth_anything:
     model_file : ''
     encoder: vits
     device : 'cuda:0'
+    max_depth: 2.5
     # ROS topic configuration
     image_topic: /image_rect
     depth_image_topic : /depth
