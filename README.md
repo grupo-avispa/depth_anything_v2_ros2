@@ -30,7 +30,17 @@ cd colcon_workspace/src
 git clone --recurse-submodules https://github.com/grupo-avispa/depth_anything_v2_ros2.git -b main
 pip3 install -r requirements.txt
 ```
-Before building, make sure to download the depth_anything_v2 model weights and place them in the `models` directory. You can download them [here](https://huggingface.co/depth-anything).
+Before building, make sure to download the depth_anything_v2 model weights and place them in the `models` directory.
+
+> [!IMPORTANT]
+> This node uses the **metric depth** model (`depth_anything_v2.metric_depth`), so you must download a **metric** checkpoint, not a relative one. A relative checkpoint loaded into the metric architecture produces mis-scaled, non-metric depth (objects appear too far away and bounding boxes become oversized). For indoor scenes use the Hypersim model; for outdoor scenes use the VKITTI model.
+
+You can download the metric checkpoints [here](https://huggingface.co/depth-anything). For example, the indoor (Hypersim) small model:
+```bash
+cd colcon_workspace/src/depth_anything_v2_ros2/models
+wget https://huggingface.co/depth-anything/Depth-Anything-V2-Metric-Hypersim-Small/resolve/main/depth_anything_v2_metric_hypersim_vits.pth
+```
+Remember to set `max_depth` to the value the checkpoint was trained with (20 m for Hypersim/indoor, 80 m for VKITTI/outdoor).
 
 Then, install the ROS2 dependencies using rosdep and build the package using:
 ```bash
@@ -78,13 +88,17 @@ This node subscribes to a camera topic and publishes the depth map of the scene.
 
 	Device to use for the inference (`cpu` or `cuda`).
 
-* **`model_file`** (string, default: "depth_anything_v2_vits.pth")
+* **`model_file`** (string, default: "depth_anything_v2_metric_hypersim_vits.pth")
 
-	 Path to the model, located in the `models` directory.
+	 Path to the model, located in the `models` directory. It must be a **metric** checkpoint (see the note in the [Building](#building) section).
 
 * **`encoder`** (string, default: "vits")
 
 	Encoder to use for the inference (`vits`, `vitb` or `vitl`).
+
+* **`max_depth`** (double, default: 10.0)
+
+	Maximum depth, in meters, used to scale the metric model output. It must match the value the checkpoint was trained with (`20.0` for Hypersim/indoor, `80.0` for VKITTI/outdoor).
 
 
 [Ubuntu]: https://ubuntu.com/

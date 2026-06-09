@@ -1,10 +1,11 @@
 depth_anything:
   ros__parameters:
     # Model configuration
-    model_file : ''
+    model_file: ""
     encoder: vits
-    device : 'cuda:0'
-    max_depth: 2.5
+    device: "cuda:0"
+    # Must match the metric checkpoint: Hypersim (indoor) was supervised up to 20 m.
+    max_depth: 20.0
     # ROS topic configuration
     image_topic: /image_rect
-    depth_image_topic : /depth
+    depth_image_topic: /depth
