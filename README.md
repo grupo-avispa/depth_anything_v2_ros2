@@ -20,7 +20,10 @@ The depth_anything_v2_ros2 package has been tested under [ROS2] jazzy on [Ubuntu
 
 - [Robot Operating System (ROS) 2](https://docs.ros.org/en/jazzy/) (middleware for robotics),
 - [depth_anything_v2](https://github.com/DepthAnything/Depth-Anything-V2) (library for depth estimation),
-- [torch](https://pytorch.org/) (deep learning framework)
+- [torch](https://pytorch.org/) (deep learning framework),
+- [nav2_common](https://github.com/ros-planning/navigation2) (used by the launch file to rewrite the parameters YAML).
+
+`torch`, `torchvision`, `opencv-python` and `numpy` are installed via `pip` (see [Building](#building)); the rest are regular ROS 2 dependencies resolved by `rosdep`.
 
 #### Building
 
@@ -49,6 +52,19 @@ rosdep install -i --from-path src --rosdistro jazzy -y
 colcon build --symlink-install
 ```
 
+#### Updating the depth_anything_v2 submodule
+
+The `depth_anything_v2` submodule is pinned to a fixed commit (there are no upstream tags/releases to pin to instead), so `git submodule update` always checks out that exact commit and builds stay reproducible. To deliberately move to a newer upstream commit:
+```bash
+cd colcon_workspace/src/depth_anything_v2_ros2/depth_anything_v2
+git fetch
+git checkout <new-commit-sha>
+cd ..
+git add depth_anything_v2
+git commit -m "build: update depth_anything_v2 submodule to <new-commit-sha>"
+```
+Rebuild and re-run the test suite afterwards, since upstream changes to `dpt.py` or the `dinov2` backbone can break the `DepthEstimator` import.
+
 ## Usage
 
 With some RGB image source running, run the depth_anything_v2_ros2 node with:
@@ -56,11 +72,18 @@ With some RGB image source running, run the depth_anything_v2_ros2 node with:
 ros2 launch depth_anything_v2_ros2 default.launch.py
 ```
 
+`depth_anything` is a [managed (lifecycle) node](https://design.ros2.org/articles/node_lifecycle.html). With the default `autostart:=true` launch argument it configures (loads the model) and activates (creates the topics) itself on startup. To drive it manually instead, launch with `autostart:=false` and use:
+```bash
+ros2 lifecycle set /depth_anything configure
+ros2 lifecycle set /depth_anything activate
+```
+A failed `configure` (e.g. an invalid `encoder` or a missing `model_file`) is reported as a clean lifecycle transition failure instead of crashing the process.
+
 ## Nodes
 
 ### depth_anything
 
-This node subscribes to a camera topic and publishes the depth map of the scene.
+This is a managed (lifecycle) node. It subscribes to a camera topic and publishes the depth map of the scene, alongside the matching `CameraInfo` so downstream nodes (e.g. `depth_image_proc` for point clouds) can pair both topics.
 
 #### Subscribed Topics
 
@@ -68,11 +91,19 @@ This node subscribes to a camera topic and publishes the depth map of the scene.
 
 	The RGB image topic.
 
+* **`camera/color/camera_info`** ([sensor_msgs/CameraInfo])
+
+	Camera info matching `image_topic`, republished alongside the depth image.
+
 #### Published Topics
 
 * **`depth`** ([sensor_msgs/Image])
 
 	The depth map estimated of the scene.
+
+* **`depth/camera_info`** ([sensor_msgs/CameraInfo])
+
+	Camera info matching the published depth image, timestamped with the same header.
 
 #### Parameters
 
@@ -80,9 +111,17 @@ This node subscribes to a camera topic and publishes the depth map of the scene.
 
 	Topic where the image will be subscribed.
 
+* **`camera_info_topic`** (string, default: "camera/color/camera_info")
+
+	Topic where the camera info matching `image_topic` will be subscribed.
+
 * **`depth_image_topic`** (string, default: "depth")
 
 	Topic where the raw depth image will be published.
+
+* **`depth_camera_info_topic`** (string, default: "depth/camera_info")
+
+	Topic where the camera info matching the depth image will be published.
 
 * **`device`** (string, default: "cuda:0")
 
@@ -104,3 +143,4 @@ This node subscribes to a camera topic and publishes the depth map of the scene.
 [Ubuntu]: https://ubuntu.com/
 [ROS2]: https://docs.ros.org/en/jazzy/
 [sensor_msgs/Image]: https://docs.ros2.org/jazzy/api/sensor_msgs/msg/Image.html
+[sensor_msgs/CameraInfo]: https://docs.ros2.org/jazzy/api/sensor_msgs/msg/CameraInfo.html
