@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''Launches a depth_anything_v2_ros2 node with default parameters.'''
+'''Launches a depth_anything_v2_ros2 lifecycle node with default parameters and autostarts it.'''
 
 import os
 
@@ -24,7 +24,7 @@ from ament_index_python import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch_ros.actions import Node
+from launch_ros.actions import LifecycleNode
 from launch.substitutions import LaunchConfiguration
 from nav2_common.launch import RewrittenYaml
 
@@ -32,13 +32,16 @@ from nav2_common.launch import RewrittenYaml
 def generate_launch_description():
     # Getting directories and launch-files
     depth_anything_dir = get_package_share_directory('depth_anything_v2_ros2')
-    default_params_file = os.path.join(depth_anything_dir, 'config', 'params.yaml')
-    default_model_file = os.path.join(depth_anything_dir, 'models', 'depth_anything_v2_vits.pth')
+    default_params_file = os.path.join(
+        depth_anything_dir, 'config', 'params.yaml')
+    default_model_file = os.path.join(
+        depth_anything_dir, 'models', 'depth_anything_v2_vits.pth')
 
     # Input parameters declaration
     params_file = LaunchConfiguration('params_file')
     model_file = LaunchConfiguration('model_file')
     log_level = LaunchConfiguration('log_level')
+    autostart = LaunchConfiguration('autostart')
 
     declare_params_file_arg = DeclareLaunchArgument(
         'params_file',
@@ -58,6 +61,12 @@ def generate_launch_description():
         description='Logging level (info, debug, ...)'
     )
 
+    declare_autostart_arg = DeclareLaunchArgument(
+        'autostart',
+        default_value='true',
+        description='Automatically configure and activate the lifecycle node on launch'
+    )
+
     # Create our own temporary YAML files that include substitutions
     param_substitutions = {
         'model_file': model_file,
@@ -70,23 +79,27 @@ def generate_launch_description():
         convert_types=True
     )
 
-    # Prepare the detection node.
-    depth_anything_node = Node(
+    # Prepare the depth estimation lifecycle node. With the default
+    # `autostart` argument, launch_ros transitions it to configure and
+    # activate right after startup.
+    depth_anything_node = LifecycleNode(
         package='depth_anything_v2_ros2',
         namespace='',
         executable='depth_anything_v2_ros2',
         name='depth_anything',
         parameters=[configured_params],
+        autostart=autostart,
         emulate_tty=True,
         output='screen',
         arguments=[
             '--ros-args',
-            '--log-level', ['depth_anything:=', LaunchConfiguration('log_level')]]
+            '--log-level', ['depth_anything:=', log_level]]
     )
 
     return LaunchDescription([
         declare_params_file_arg,
         declare_model_file_arg,
         declare_log_level_arg,
+        declare_autostart_arg,
         depth_anything_node
     ])
