@@ -8,4 +8,6 @@ depth_anything:
     max_depth: 20.0
     # ROS topic configuration
     image_topic: /image_rect
+    camera_info_topic: /camera_info
     depth_image_topic: /depth
+    depth_camera_info_topic: /depth/camera_info
