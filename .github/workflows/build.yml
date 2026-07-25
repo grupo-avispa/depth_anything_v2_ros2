@@ -49,4 +49,3 @@ jobs:
                 "mixin": ["coverage-pytest"]
               }
             }
-          skip-tests: true
