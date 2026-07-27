@@ -38,13 +38,15 @@ jobs:
         with:
           package-name: depth_anything_v2_ros2
           target-ros2-distro: jazzy
+          coverage-result: false
           colcon-defaults: |
             {
               "build": {
                 "mixin": ["coverage-pytest"]
               },
               "test": {
-                "mixin": ["coverage-pytest"]
+                "mixin": ["coverage-pytest"],
+                "python-testing": "pytest"
               }
             }
           skip-tests: false
