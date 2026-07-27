@@ -17,23 +17,20 @@
 # limitations under the License.
 
 
-# Python
+# Standard library
 import copy
 import time
 
-import torch
+# Third-party
 from cv_bridge import CvBridge, CvBridgeError
-
-# ROS 2
+from depth_anything_v2_ros2.depth_estimator import DepthEstimator, resolve_device
 import rclpy
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.lifecycle import LifecycleNode, State, TransitionCallbackReturn
-from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSHistoryPolicy, QoSReliabilityPolicy
+from rclpy.qos import QoSDurabilityPolicy, QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
 from sensor_msgs.msg import CameraInfo, Image
-
-# DepthAnything V2
-from depth_anything_v2_ros2.depth_estimator import DepthEstimator, resolve_device
+import torch
 
 SENSOR_QOS_PROFILE = QoSProfile(
     durability=QoSDurabilityPolicy.VOLATILE,
@@ -43,7 +40,8 @@ SENSOR_QOS_PROFILE = QoSProfile(
 
 
 class DepthAnythingROS(LifecycleNode):
-    """DepthAnythingROS lifecycle node.
+    """
+    DepthAnythingROS lifecycle node.
 
     This managed node subscribes to an RGB image topic and publishes its
     metric depth estimation. The model is loaded in ``on_configure`` and
@@ -83,6 +81,7 @@ class DepthAnythingROS(LifecycleNode):
             Estimated depth image, in 32FC1.
         depth_camera_info_topic : sensor_msgs.msg.CameraInfo
             Camera info matching the published depth image.
+
     """
 
     def __init__(self):
@@ -102,7 +101,8 @@ class DepthAnythingROS(LifecycleNode):
         self.get_params()
 
     def _declare(self, name, default):
-        """Declare a parameter, read its resolved value and log it.
+        """
+        Declare a parameter, read its resolved value and log it.
 
         Parameters
         ----------
@@ -115,18 +115,21 @@ class DepthAnythingROS(LifecycleNode):
         -------
         Any
             The resolved parameter value.
+
         """
         value = self.declare_parameter(name, default).value
         self.get_logger().info(f'Parameter [{name}] set to: [{value}]')
         return value
 
     def get_params(self) -> None:
-        """Declare, read and validate the node parameters.
+        """
+        Declare, read and validate the node parameters.
 
         Raises
         ------
         ValueError
             If `max_depth` is not strictly positive.
+
         """
         self.image_topic = self._declare(
             'image_topic', 'camera/color/image_raw')
@@ -146,12 +149,14 @@ class DepthAnythingROS(LifecycleNode):
                 f'Wrong max_depth: [{self.max_depth}]. Must be greater than 0')
 
     def on_configure(self, state: State) -> TransitionCallbackReturn:
-        """Load the depth estimation model and create the lifecycle publishers.
+        """
+        Load the depth estimation model and create the lifecycle publishers.
 
         Returns
         -------
         TransitionCallbackReturn
             SUCCESS if the model was loaded, FAILURE otherwise.
+
         """
         self.device = resolve_device(self.device, torch.cuda.is_available())
         self.get_logger().info(f'Setting device to: [{self.device}]')
@@ -211,10 +216,14 @@ class DepthAnythingROS(LifecycleNode):
         self.last_camera_info = camera_info_msg
 
     def image_callback(self, image_msg: Image) -> None:
-        """Estimate and publish the metric depth of the incoming image.
+        """
+        Estimate and publish the metric depth of the incoming image.
 
-        Args:
-            image_msg (Image): Image message.
+        Parameters
+        ----------
+        image_msg : Image
+            Image message.
+
         """
         # Only run inference if there's any subscriber.
         if self.depth_image_pub.get_subscription_count() == 0:

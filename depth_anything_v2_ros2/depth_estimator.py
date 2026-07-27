@@ -22,10 +22,9 @@ from __future__ import annotations
 
 import os
 
+from depth_anything_v2.metric_depth.depth_anything_v2.dpt import DepthAnythingV2
 import numpy as np
 import torch
-
-from depth_anything_v2.metric_depth.depth_anything_v2.dpt import DepthAnythingV2
 
 # Architecture parameters per encoder, as required by DepthAnythingV2.
 ENCODER_CONFIGS = {
@@ -36,7 +35,8 @@ ENCODER_CONFIGS = {
 
 
 def select_encoder_config(encoder: str) -> dict:
-    """Return the DepthAnythingV2 architecture kwargs for the given encoder.
+    """
+    Return the DepthAnythingV2 architecture kwargs for the given encoder.
 
     Parameters
     ----------
@@ -52,6 +52,7 @@ def select_encoder_config(encoder: str) -> dict:
     ------
     ValueError
         If ``encoder`` is not one of the supported values.
+
     """
     config = ENCODER_CONFIGS.get(encoder)
     if config is None:
@@ -61,7 +62,8 @@ def select_encoder_config(encoder: str) -> dict:
 
 
 def resolve_device(requested: str, cuda_available: bool) -> str:
-    """Resolve the torch device to use, falling back to CPU when CUDA is unavailable.
+    """
+    Resolve the torch device to use, falling back to CPU when CUDA is unavailable.
 
     Parameters
     ----------
@@ -74,6 +76,7 @@ def resolve_device(requested: str, cuda_available: bool) -> str:
     -------
     str
         ``requested`` if it is ``cpu`` or CUDA is available, otherwise ``cpu``.
+
     """
     if requested != 'cpu' and not cuda_available:
         return 'cpu'
@@ -81,7 +84,8 @@ def resolve_device(requested: str, cuda_available: bool) -> str:
 
 
 def postprocess_depth(raw_depth: np.ndarray, max_depth: float) -> np.ndarray:
-    """Clip a raw depth prediction to ``[0, max_depth]`` and cast it to float32.
+    """
+    Clip a raw depth prediction to ``[0, max_depth]`` and cast it to float32.
 
     Parameters
     ----------
@@ -94,12 +98,14 @@ def postprocess_depth(raw_depth: np.ndarray, max_depth: float) -> np.ndarray:
     -------
     np.ndarray
         The clipped depth map, as ``float32``.
+
     """
     return np.clip(raw_depth, 0, max_depth).astype(np.float32)
 
 
 class DepthEstimator:
-    """Loads a metric DepthAnythingV2 model and runs inference on BGR images.
+    """
+    Loads a metric DepthAnythingV2 model and runs inference on BGR images.
 
     This class has no ROS dependency so it can be unit tested and reused
     outside of a ROS node.
@@ -114,6 +120,7 @@ class DepthEstimator:
         Torch device to run inference on (e.g. ``cpu``, ``cuda:0``).
     max_depth : float
         Maximum depth, in meters, the checkpoint was trained with.
+
     """
 
     def __init__(self, encoder: str, model_file: str, device: str, max_depth: float):
@@ -124,7 +131,8 @@ class DepthEstimator:
         self.model = None
 
     def load(self) -> None:
-        """Build the model architecture and load its weights.
+        """
+        Build the model architecture and load its weights.
 
         Raises
         ------
@@ -132,6 +140,7 @@ class DepthEstimator:
             If ``self.encoder`` is not supported.
         FileNotFoundError
             If ``self.model_file`` does not exist.
+
         """
         config = select_encoder_config(self.encoder)
         self.model = DepthAnythingV2(encoder=self.encoder, max_depth=self.max_depth, **config)
@@ -146,7 +155,8 @@ class DepthEstimator:
         self.model.to(self.device).eval()
 
     def infer(self, bgr_image: np.ndarray) -> np.ndarray:
-        """Run metric depth inference on a BGR image.
+        """
+        Run metric depth inference on a BGR image.
 
         Parameters
         ----------
@@ -157,6 +167,7 @@ class DepthEstimator:
         -------
         np.ndarray
             The depth map, clipped to ``[0, max_depth]`` and cast to float32.
+
         """
         raw_depth = self.model.infer_image(bgr_image)
         return postprocess_depth(raw_depth, self.max_depth)

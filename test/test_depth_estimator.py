@@ -16,15 +16,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Unit tests for the pure depth estimation domain logic.
+"""
+Unit tests for the pure depth estimation domain logic.
 
 These tests exercise `select_encoder_config`, `resolve_device` and
 `postprocess_depth` without requiring a GPU, a checkpoint file or rclpy,
 since none of them touch the model itself.
 """
-
-import numpy as np
-import pytest
 
 from depth_anything_v2_ros2.depth_estimator import (
     ENCODER_CONFIGS,
@@ -32,6 +30,8 @@ from depth_anything_v2_ros2.depth_estimator import (
     resolve_device,
     select_encoder_config,
 )
+import numpy as np
+import pytest
 
 
 @pytest.mark.parametrize('encoder', ['vits', 'vitb', 'vitl'])

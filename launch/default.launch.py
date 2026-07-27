@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''Launches a depth_anything_v2_ros2 lifecycle node with default parameters and autostarts it.'''
+"""Launches a depth_anything_v2_ros2 lifecycle node with default parameters and autostarts it."""
 
 import os
 
@@ -24,8 +24,8 @@ from ament_index_python import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch_ros.actions import LifecycleNode
 from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import LifecycleNode
 from nav2_common.launch import RewrittenYaml
 
 
