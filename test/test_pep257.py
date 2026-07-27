@@ -19,5 +19,7 @@ import pytest
 @pytest.mark.linter
 @pytest.mark.pep257
 def test_pep257():
-    rc = main(argv=['.', 'test'])
+    # 'depth_anything_v2' is a vendored third-party git submodule
+    # (DepthAnything/Depth-Anything-V2) and is not linted by this project.
+    rc = main(argv=['.', 'test', '--exclude', 'depth_anything_v2'])
     assert rc == 0, 'Found code style errors / warnings'

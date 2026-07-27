@@ -19,7 +19,9 @@ import pytest
 @pytest.mark.flake8
 @pytest.mark.linter
 def test_flake8():
-    rc, errors = main_with_errors(argv=[])
+    # 'depth_anything_v2' is a vendored third-party git submodule
+    # (DepthAnything/Depth-Anything-V2) and is not linted by this project.
+    rc, errors = main_with_errors(argv=['--exclude', 'depth_anything_v2'])
     assert rc == 0, \
         'Found %d code style errors / warnings:\n' % len(errors) + \
         '\n'.join(errors)
