@@ -32,7 +32,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
       - name: Install dependencies
-        run: pip3 install --break-system-packages --ignore-installed -r requirements.txt
+        run: pip3 install --break-system-packages --ignore-installed -r requirements.txt "setuptools<80"
       - name: Build packages
         uses: ros-tooling/action-ros-ci@0.4.8
         with:
@@ -41,7 +41,7 @@ jobs:
           colcon-defaults: |
             {
               "build": {
-                "mixin": ["coverage-gcc", "coverage-pytest"]
+                "mixin": ["coverage-pytest"]
               },
               "test": {
                 "mixin": ["coverage-pytest"]
