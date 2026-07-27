@@ -18,7 +18,7 @@ jobs:
       - name: Install global dependencies
         run: |
           apt update && apt install --no-install-recommends -y \
-            git python3-pip python3-colcon-coveragepy-result
+            git python3-pip python3-colcon-coveragepy-result python3-pytest-cov
       - name: Checkout Repository
         uses: actions/checkout@v7
         with:
